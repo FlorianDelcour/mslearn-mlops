@@ -29,13 +29,17 @@ def parse_args():
     parser.add_argument("--subscription-id", dest="subscription_id", required=True)
     parser.add_argument("--resource-group", dest="resource_group", required=True)
     parser.add_argument("--workspace", dest="workspace", required=True)
-    parser.add_argument("--endpoint-name", dest="endpoint_name", default="diabetes-endpoint")
+    parser.add_argument(
+        "--endpoint-name", dest="endpoint_name", default="diabetes-endpoint"
+    )
     parser.add_argument("--deployment-name", dest="deployment_name", default="blue")
 
     return parser.parse_args()
 
 
-def get_ml_client(subscription_id: str, resource_group: str, workspace: str) -> MLClient:
+def get_ml_client(
+    subscription_id: str, resource_group: str, workspace: str
+) -> MLClient:
     credential = DefaultAzureCredential()
     return MLClient(
         credential=credential,
@@ -72,7 +76,7 @@ def create_or_update_deployment(
         name=deployment_name,
         endpoint_name=endpoint_name,
         model=model,
-        instance_type="Standard_D2as_v4",
+        instance_type="Standard_E4ds_v4",
         instance_count=1,
         data_collector=get_data_collector(),
     )
@@ -80,7 +84,9 @@ def create_or_update_deployment(
     return ml_client.online_deployments.begin_create_or_update(deployment).result()
 
 
-def set_traffic_to_deployment(ml_client: MLClient, endpoint_name: str, deployment_name: str) -> None:
+def set_traffic_to_deployment(
+    ml_client: MLClient, endpoint_name: str, deployment_name: str
+) -> None:
     endpoint = ml_client.online_endpoints.get(name=endpoint_name)
     endpoint.traffic = {deployment_name: 100}
     ml_client.online_endpoints.begin_create_or_update(endpoint).result()
